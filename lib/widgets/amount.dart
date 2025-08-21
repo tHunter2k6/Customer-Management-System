@@ -8,13 +8,13 @@ import 'package:pos/main.dart';
 import 'package:pos/widgets/textfield.dart';
 
 class Amount extends StatefulWidget {
-  final discountController;
-  final paidController;
+  TextEditingController? discountController;
+  TextEditingController? paidController;
   final Function updateCalculations;
   final int total;
   final int balance;
   final int? payable;
-  const Amount(
+  Amount(
       {super.key,
       this.discountController,
       this.paidController,
@@ -111,14 +111,15 @@ class _AmountState extends State<Amount> {
             ),
             // discount row
             Container(
-              width: 150.w,
+              width: 180.w,
               height: 50.h,
               alignment: Alignment.centerLeft,
               padding: EdgeInsets.symmetric(horizontal: 8.w),
               child: MyTextField(
                 textAlign: TextAlign.start,
                 invoiceData: true,
-                hintText: '',
+                hintText: '0',
+                fontSize: 22.sp,
                 textEditingController: widget.discountController,
                 border: false,
                 onChanged: (p1) {
@@ -143,12 +144,13 @@ class _AmountState extends State<Amount> {
             // paid row
             Container(
               height: 50.h,
-              width: 150.w,
+              width: 180.w,
               alignment: Alignment.centerLeft,
               padding: EdgeInsets.symmetric(horizontal: 8.w),
               child: MyTextField(
                 textAlign: TextAlign.start,
-                hintText: '',
+                hintText: '0',
+                fontSize: 22.sp,
                 invoiceData: true,
                 textEditingController: widget.paidController,
                 border: false,

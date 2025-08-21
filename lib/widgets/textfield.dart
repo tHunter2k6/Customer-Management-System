@@ -4,7 +4,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:pos/main.dart';
 
-class MyTextField extends StatelessWidget {
+class MyTextField extends StatefulWidget {
   final String hintText;
   TextEditingController? textEditingController;
   final bool border;
@@ -24,26 +24,32 @@ class MyTextField extends StatelessWidget {
       required this.textAlign});
 
   @override
+  State<MyTextField> createState() => _MyTextFieldState();
+}
+
+class _MyTextFieldState extends State<MyTextField> {
+  @override
+  @override
   Widget build(BuildContext context) {
     return TextField(
-      controller: textEditingController,
-      onChanged: onChanged,
-      textAlign: textAlign,
+      controller: widget.textEditingController,
+      onChanged: widget.onChanged,
+      textAlign: widget.textAlign,
       decoration: InputDecoration(
-        hintText: hintText,
+        hintText: widget.hintText,
         hintStyle: TextStyle(
-          fontSize: fontSize,
-          color: invoiceData ? textColor : secondaryTextColor,
+          fontSize: widget.fontSize,
+          color: widget.invoiceData ? textColor : secondaryTextColor,
         ),
         focusedBorder: OutlineInputBorder(
-          borderSide: border
+          borderSide: widget.border
               ? BorderSide(
                   color: Colors.blueAccent,
                 )
               : BorderSide.none,
         ),
         border: OutlineInputBorder(
-          borderSide: border ? BorderSide() : BorderSide.none,
+          borderSide: widget.border ? BorderSide() : BorderSide.none,
         ),
       ),
     );
