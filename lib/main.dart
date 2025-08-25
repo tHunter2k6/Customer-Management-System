@@ -6,6 +6,7 @@ import 'package:pos/pages/home_page.dart';
 import 'package:pos/pages/new_Invoice.dart';
 
 Color backgroundColor = const Color.fromARGB(255, 18, 18, 18);
+Color containerColor = const Color.fromARGB(255, 28, 28, 28);
 Color altColumn1 = const Color.fromARGB(255, 79, 79, 79);
 Color altColumn2 = const Color.fromARGB(255, 30, 30, 30);
 Color textColor = const Color.fromARGB(255, 237, 237, 237);

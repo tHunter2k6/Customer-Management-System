@@ -10,18 +10,27 @@ class MyTextField extends StatefulWidget {
   final bool border;
   bool invoiceData = false;
   Function(String)? onChanged;
+  Function(String)? onSubmitted;
+  bool isEditing = true;
   double? fontSize = 22.sp;
+  double? hintFontSize = 22.sp;
   TextAlign textAlign;
+  FocusNode? focusNode;
 
-  MyTextField(
-      {super.key,
-      required this.hintText,
-      required this.border,
-      required this.invoiceData,
-      this.textEditingController,
-      this.onChanged,
-      this.fontSize,
-      required this.textAlign});
+  MyTextField({
+    super.key,
+    required this.hintText,
+    required this.border,
+    required this.invoiceData,
+    required this.textAlign,
+    required this.isEditing,
+    this.textEditingController,
+    this.onChanged,
+    this.hintFontSize,
+    this.fontSize,
+    this.onSubmitted,
+    this.focusNode,
+  });
 
   @override
   State<MyTextField> createState() => _MyTextFieldState();
@@ -32,13 +41,17 @@ class _MyTextFieldState extends State<MyTextField> {
   @override
   Widget build(BuildContext context) {
     return TextField(
+      focusNode: widget.focusNode,
+      onSubmitted: widget.onSubmitted,
       controller: widget.textEditingController,
       onChanged: widget.onChanged,
+      readOnly: !widget.isEditing,
       textAlign: widget.textAlign,
+      style: TextStyle(fontSize: widget.fontSize),
       decoration: InputDecoration(
         hintText: widget.hintText,
         hintStyle: TextStyle(
-          fontSize: widget.fontSize,
+          fontSize: widget.hintFontSize,
           color: widget.invoiceData ? textColor : secondaryTextColor,
         ),
         focusedBorder: OutlineInputBorder(

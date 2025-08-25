@@ -81,6 +81,7 @@ addToFirebase(
   int invoice,
   int discountController,
   int paidController,
+  int profit,
 ) async {
   nameController = removeNonAlphanumeric(nameController);
   phoneController = removeNonAlphanumeric(phoneController);
@@ -92,16 +93,17 @@ addToFirebase(
   Map<String, dynamic> detailsMap = {};
   int index = 1;
   for (List<TextEditingController> job in detailsTableControllers) {
-    {
+    if (job[0].text != '') {
       detailsMap["Job $index"] = {
         'Description': job[0].text,
         'Quantity': int.tryParse(job[1].text) ?? 0,
         'Cost': int.tryParse(job[2].text) ?? 0,
+        'Purchase': int.tryParse(job[3].text) ?? 0,
       };
       index += 1; //increment job count
     }
   }
-  final date = DateTime.now().toString();
+  final date = DateTime.now();
   try {
     //add new invoice to invoice collection
     await instance.collection('invoices').doc(invoice.toString()).set({
@@ -119,6 +121,7 @@ addToFirebase(
       'vehicle': makeController,
       'vehicle number': vehicleController,
       'phone number': phoneController,
+      'profit': profit,
     });
 
     updateInvoiceCount();
@@ -152,6 +155,7 @@ addToFirebase(
           'discount': discountController,
           'payable': payable,
           'paid': paidController,
+          'profit': profit,
           'balance': balance,
         });
       } else
@@ -179,6 +183,7 @@ addToFirebase(
           'discount': discountController,
           'payable': payable,
           'paid': paidController,
+          'profit': profit,
           'balance': balance,
         });
       }
@@ -207,6 +212,7 @@ addToFirebase(
         'discount': discountController,
         'payable': payable,
         'paid': paidController,
+        'profit': profit,
         'balance': balance,
       });
     }
@@ -229,6 +235,7 @@ updateInvoice(
   int invoice,
   int discountController,
   int paidController,
+  int profit,
 ) async {
   nameController = removeNonAlphanumeric(nameController);
   phoneController = removeNonAlphanumeric(phoneController);
@@ -240,16 +247,17 @@ updateInvoice(
   Map<String, dynamic> detailsMap = {};
   int index = 1;
   for (List<TextEditingController> job in detailsTableControllers) {
-    {
+    if (job[0].text != '') {
       detailsMap["Job $index"] = {
         'Description': job[0].text,
         'Quantity': int.tryParse(job[1].text) ?? 0,
         'Cost': int.tryParse(job[2].text) ?? 0,
+        'Purchase': int.tryParse(job[3].text) ?? 0,
       };
       index += 1; //increment job count
     }
   }
-  final date = DateTime.now().toString();
+  final date = DateTime.now();
   try {
     //add new invoice to invoice collection
     await instance.collection('invoices').doc(invoice.toString()).update({
@@ -262,6 +270,7 @@ updateInvoice(
       'payable': payable,
       'paid': paidController,
       'balance': balance,
+      'profit': profit,
       'owner': nameController,
       'model': modelController,
       'vehicle': makeController,
@@ -283,6 +292,7 @@ updateInvoice(
       'total': total,
       'discount': discountController,
       'payable': payable,
+      'profit': profit,
       'paid': paidController,
       'balance': balance,
     });
