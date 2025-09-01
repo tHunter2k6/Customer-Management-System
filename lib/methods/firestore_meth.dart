@@ -1,19 +1,149 @@
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-FirebaseFirestore instance = FirebaseFirestore.instance;
+late FirebaseFirestore instance;
 
-searchUser(String filter, String value) async {
-  String searchVal = removeNonAlphanumeric(value.toLowerCase());
+List<String> clientNames = [];
+
+//run at startup and make instance
+
+getAllClientNames() async {
+  clientNames.clear();
+  instance = FirebaseFirestore.instance;
+
+  QuerySnapshot<Map<String, dynamic>> collection =
+      await instance.collection('clients').get();
+  //
+  collection.docs.forEach((doc) {
+    clientNames.add(
+      doc.id,
+    );
+    //
+    // Map<String, dynamic> docData = doc.data();
+    // phoneNumbers.add(docData['phone_number']);
+    // //
+    // docData.entries.forEach((entry) {
+    //   if (entry.key != 'phone_number') {
+    //     var temp = entry.value;
+    //     print(temp);
+    //     regNumbers.add(temp['vehicle_number'].toString());
+    //   }
+    // });
+  });
+}
+
+getRemainingOwed(String name) async {
   try {
-    var collection = await instance
-        .collection('clients')
-        .where(filter, isEqualTo: searchVal)
+    QuerySnapshot<Map<String, dynamic>> myDocs = await instance
+        .collection('invoices')
+        .where('owner', isEqualTo: name)
+        .where(
+          'balance',
+          isGreaterThan: 0,
+        )
         .get();
 
-    return collection.docs.length;
-  } catch (e) {}
+    Map<String, dynamic> allData = {};
+    myDocs.docs.forEach((doc) {
+      if (doc.data().isNotEmpty) {
+        var docData = doc.data();
+        allData[docData['invoice']] = docData['balance'];
+      }
+    });
+    return allData;
+  } catch (e) {
+    print(e.toString());
+  }
 }
+
+getUserDetails(String name) async {
+  try {
+    DocumentSnapshot<Map<String, dynamic>> userDoc =
+        await instance.collection('clients').doc(name).get();
+
+    if (userDoc.exists) {
+      Map<String, dynamic> userDetails = userDoc.data() as Map<String, dynamic>;
+      return userDetails;
+    } else {
+      return {};
+    }
+  } catch (e) {
+    return {};
+  }
+}
+
+getUserInvoices(Map<String, dynamic> userDetails, String name //client name
+    ) async {
+  try {
+    var tempList = userDetails.keys.toList();
+    List vehicleNames = [];
+    Map<String, List<QueryDocumentSnapshot<Map<String, dynamic>>>> allInvoices =
+        {};
+    for (var i in tempList) {
+      if (i != 'phone_number') {
+        vehicleNames.add(i); //add all car names
+        QuerySnapshot<Map<String, dynamic>> vehicleCollection = await instance
+            .collection('clients')
+            .doc(name)
+            .collection(i)
+            .get(); //get vehicle collection
+        List<QueryDocumentSnapshot<Map<String, dynamic>>>
+            eachVehicleCollection =
+            vehicleCollection.docs.toList(); //get all invoices for that vehicle
+
+        allInvoices[i] = eachVehicleCollection;
+      }
+    }
+    return allInvoices;
+  } catch (e) {
+    return [];
+  }
+}
+
+searchData(String filter, String value) async {
+  String searchVal = removeNonAlphanumeric(value);
+  try {
+    if (filter == 'client name') {
+      //if searching client profile
+      List matches = clientNames.where(
+        (clientName) {
+          String tempName = clientName.toString().toLowerCase().replaceAll(
+                  RegExp(r'[^a-zA-Z0-9]'),
+                  '') //remove spaces etc and make lower case
+              ;
+          String tempSearch = searchVal.toLowerCase().replaceAll(
+              RegExp(r'[^a-zA-Z0-9]'),
+              ''); //remove spaces etc and make lower case
+
+          return tempName.contains(
+            tempSearch,
+          );
+        },
+      ) //check the searching value in list ykwim (clients ke naam)
+          .toList();
+
+      return matches;
+    } else {
+      //direct invoice uthaaaaoooooooo
+
+      QuerySnapshot<Map<String, dynamic>> collection = await instance
+          .collection('invoices')
+          .where(
+            filter,
+            isEqualTo:
+                searchVal.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '').toUpperCase(),
+          )
+          .get();
+      var matchingDocs = collection.docs;
+
+      return matchingDocs;
+    }
+  } catch (e) {
+    print(e.toString());
+  }
+}
+
+//go to searched Invoice
 
 getCurrentInvoice() async {
   try {
@@ -26,17 +156,19 @@ getCurrentInvoice() async {
       return null;
     }
 
-    return docData['current_invoice'] as int;
+    String invoiceNumber = docData['current_invoice'].toString();
+    return invoiceNumber;
   } catch (e) {
     return e.toString();
   }
 }
 
 updateInvoiceCount() async {
-  int currentInvoice = await getCurrentInvoice();
+  int currentInvoice = int.tryParse(await getCurrentInvoice()) as int;
+  int newCount = currentInvoice + 1;
   try {
     await instance.collection('invoices').doc('invoice_count').update({
-      'current_invoice': currentInvoice + 1,
+      'current_invoice': newCount.toString(),
     });
     return true;
   } catch (e) {
@@ -64,9 +196,10 @@ getInvoiceInfo(String invoice) async {
 }
 
 String removeNonAlphanumeric(String input) {
-  return input.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
+  return input.replaceAll(RegExp(r'[^a-zA-Z0-9 ]'), '');
 }
 
+//add new invoice
 addToFirebase(
   List<List<TextEditingController>> detailsTableControllers,
   int total,
@@ -78,14 +211,16 @@ addToFirebase(
   String makeController,
   String modelController,
   String kilometerController,
-  int invoice,
+  String invoice,
   int discountController,
   int paidController,
   int profit,
 ) async {
   nameController = removeNonAlphanumeric(nameController);
-  phoneController = removeNonAlphanumeric(phoneController);
-  vehicleController = removeNonAlphanumeric(vehicleController);
+  phoneController = phoneController.replaceAll(RegExp(r'[^a-zA-Z0-9]'), '');
+  vehicleController = vehicleController
+      .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')
+      .toUpperCase(); //make it caps
   makeController = removeNonAlphanumeric(makeController);
   modelController = removeNonAlphanumeric(modelController);
   kilometerController = removeNonAlphanumeric(kilometerController);
@@ -118,7 +253,7 @@ addToFirebase(
       'balance': balance,
       'owner': nameController,
       'model': modelController,
-      'vehicle': makeController,
+      'make': makeController,
       'vehicle number': vehicleController,
       'phone number': phoneController,
       'profit': profit,
@@ -127,15 +262,13 @@ addToFirebase(
     updateInvoiceCount();
 
     //add invoice under respective client data
-    var newUser =
-        await instance.collection('clients').doc(nameController).get();
 
-    if (newUser.exists) //check if already a client
+    if (clientNames.contains(nameController)) //check if already a client
     {
       var sth = await instance
           .collection('clients')
           .doc(nameController)
-          .collection(makeController)
+          .collection(modelController)
           .limit(1)
           .get();
       if (sth.docs.isNotEmpty) //check if new car
@@ -144,7 +277,7 @@ addToFirebase(
         await instance
             .collection('clients')
             .doc(nameController)
-            .collection(makeController)
+            .collection(modelController)
             .doc(invoice.toString())
             .set({
           'details': detailsMap,
@@ -162,9 +295,10 @@ addToFirebase(
       //if new car then add car details under client
       {
         await instance.collection('clients').doc(nameController).update({
-          makeController: {
+          modelController: {
+            //car name as key
             'model': modelController,
-            'vehicle': makeController,
+            'make': makeController,
             'vehicle_number': vehicleController,
           }
         });
@@ -172,7 +306,7 @@ addToFirebase(
         await instance
             .collection('clients')
             .doc(nameController)
-            .collection(makeController)
+            .collection(modelController) //car name
             .doc(invoice.toString())
             .set({
           'details': detailsMap,
@@ -188,11 +322,13 @@ addToFirebase(
         });
       }
     } else {
-      // if new client then make new document and add car details
+      //locally add NEW client name to local list ykwim
+      clientNames.add(nameController);
+      // make NEW document of client and add car details
       await instance.collection('clients').doc(nameController).set({
-        makeController: {
+        modelController: {
           'model': modelController,
-          'vehicle': makeController,
+          'make': makeController,
           'vehicle_number': vehicleController,
         },
         'phone_number': phoneController,
@@ -201,7 +337,7 @@ addToFirebase(
       await instance
           .collection('clients')
           .doc(nameController)
-          .collection(makeController)
+          .collection(modelController)
           .doc(invoice.toString())
           .set({
         'details': detailsMap,
@@ -221,6 +357,7 @@ addToFirebase(
   }
 }
 
+//update old invoice
 updateInvoice(
   List<List<TextEditingController>> detailsTableControllers,
   int total,
@@ -232,7 +369,7 @@ updateInvoice(
   String makeController,
   String modelController,
   String kilometerController,
-  int invoice,
+  String invoice,
   int discountController,
   int paidController,
   int profit,
@@ -273,7 +410,7 @@ updateInvoice(
       'profit': profit,
       'owner': nameController,
       'model': modelController,
-      'vehicle': makeController,
+      'make': makeController,
       'vehicle number': vehicleController,
       'phone number': phoneController,
     });
@@ -282,7 +419,7 @@ updateInvoice(
     await instance
         .collection('clients')
         .doc(nameController)
-        .collection(makeController)
+        .collection(modelController)
         .doc(invoice.toString())
         .update({
       'details': detailsMap,

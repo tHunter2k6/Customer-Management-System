@@ -16,6 +16,7 @@ class MyTextField extends StatefulWidget {
   double? hintFontSize = 22.sp;
   TextAlign textAlign;
   FocusNode? focusNode;
+  Widget? suffixIcon;
 
   MyTextField({
     super.key,
@@ -30,6 +31,7 @@ class MyTextField extends StatefulWidget {
     this.fontSize,
     this.onSubmitted,
     this.focusNode,
+    this.suffixIcon,
   });
 
   @override
@@ -49,6 +51,7 @@ class _MyTextFieldState extends State<MyTextField> {
       textAlign: widget.textAlign,
       style: TextStyle(fontSize: widget.fontSize),
       decoration: InputDecoration(
+        suffixIcon: widget.suffixIcon,
         hintText: widget.hintText,
         hintStyle: TextStyle(
           fontSize: widget.hintFontSize,

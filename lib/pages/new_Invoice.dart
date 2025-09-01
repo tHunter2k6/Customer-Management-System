@@ -8,7 +8,9 @@ import 'package:flutter_screenutil/flutter_screenutil.dart';
 import 'package:intl/intl.dart';
 import 'package:pos/main.dart';
 import 'package:pos/methods/firestore_meth.dart';
+import 'package:pos/methods/printing.dart';
 import 'package:pos/pages/invoice_page.dart';
+import 'package:pos/widgets/button.dart';
 import 'package:pos/widgets/textfield.dart';
 
 class NewInvoice extends StatefulWidget {
@@ -18,7 +20,7 @@ class NewInvoice extends StatefulWidget {
   State<NewInvoice> createState() => _NewInvoiceState();
 }
 
-int? invoice;
+String? invoice;
 
 class _NewInvoiceState extends State<NewInvoice> {
   TextEditingController nameController = TextEditingController();
@@ -67,7 +69,7 @@ class _NewInvoiceState extends State<NewInvoice> {
   var controllers;
 
   getInvoice() async {
-    int temp = await getCurrentInvoice();
+    String temp = await getCurrentInvoice();
     setState(() {
       invoice = temp;
     });
@@ -98,16 +100,22 @@ class _NewInvoiceState extends State<NewInvoice> {
     int newTotal = 0;
     int newProfit = 0;
 
-    for (var controllers in detailsTableControllers) {
-      newTotal += int.tryParse(removeNonAlphanumeric(controllers[2].text)) ?? 0;
-      newProfit +=
-          int.tryParse(removeNonAlphanumeric(controllers[3].text)) ?? 0;
+    for (List<TextEditingController> controllers in detailsTableControllers) {
+      newTotal += int.tryParse(
+              (controllers[2].text).replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')) ??
+          0;
+      newProfit += int.tryParse(
+              (controllers[3].text).replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')) ??
+          0;
     }
 
-    int discount =
-        int.tryParse(removeNonAlphanumeric(discountController.text)) ?? 0;
+    int discount = int.tryParse((discountController.text)
+            .replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')) ??
+        0;
 
-    int paid = int.tryParse(removeNonAlphanumeric(paidController.text)) ?? 0;
+    int paid = int.tryParse(
+            (paidController.text).replaceAll(RegExp(r'[^a-zA-Z0-9]'), '')) ??
+        0;
 
     // Calculate payable and balance and profit
     int newPayable = newTotal - discount;
@@ -181,17 +189,13 @@ class _NewInvoiceState extends State<NewInvoice> {
     return Scaffold(
       backgroundColor: backgroundColor,
       appBar: AppBar(
-        elevation: 0,
-        backgroundColor: Colors.transparent,
-        surfaceTintColor: Colors.transparent,
-        shadowColor: Colors.transparent,
-        foregroundColor: Colors.transparent,
+        backgroundColor: backgroundColor,
       ),
       body: ListView(
         children: [
           //heading Lr autos
           Padding(
-            padding: EdgeInsets.symmetric(horizontal: 66.0),
+            padding: EdgeInsets.symmetric(horizontal: 66.0.w),
             child: SizedBox(
               child: Row(
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
@@ -207,7 +211,7 @@ class _NewInvoiceState extends State<NewInvoice> {
                   invoice == null
                       ? AutoSizeText("Loading ...")
                       : AutoSizeText(
-                          "Invoice: $invoice ",
+                          "Invoice: ${invoice?.padLeft(6, '0')} ",
                           style: TextStyle(
                             fontSize: 25.sp,
                           ),
@@ -424,11 +428,11 @@ class _NewInvoiceState extends State<NewInvoice> {
                                   ),
                                 ),
                                 Container(
+                                  // color: altColumn2,
                                   height: 50.h,
-                                  // color: altColumn1,
-                                  width: 150.w,
+                                  width: 142.w,
                                   child: AutoSizeText(
-                                    "Quantity",
+                                    "Cost",
                                     textAlign: TextAlign.end,
                                     style: TextStyle(
                                       fontSize: 22.sp,
@@ -436,11 +440,11 @@ class _NewInvoiceState extends State<NewInvoice> {
                                   ),
                                 ),
                                 Container(
-                                  // color: altColumn2,
                                   height: 50.h,
-                                  width: 150.w,
+                                  // color: altColumn1,
+                                  width: 162.w,
                                   child: AutoSizeText(
-                                    "Cost",
+                                    "Quantity",
                                     textAlign: TextAlign.end,
                                     style: TextStyle(
                                       fontSize: 22.sp,
@@ -525,21 +529,6 @@ class _NewInvoiceState extends State<NewInvoice> {
                                                   ),
                                                 ),
                                                 Container(
-                                                  height: 50.h,
-                                                  // color: altColumn1,
-                                                  width: 160.w,
-                                                  child: MyTextField(
-                                                    isEditing: true,
-                                                    textAlign: TextAlign.end,
-                                                    invoiceData: false,
-                                                    hintText: '',
-                                                    textEditingController:
-                                                        detailsTableControllers[
-                                                            index][1],
-                                                    border: false,
-                                                  ),
-                                                ),
-                                                Container(
                                                   // color: altColumn2,
                                                   width: 160.w,
                                                   height: 50.h,
@@ -572,6 +561,48 @@ class _NewInvoiceState extends State<NewInvoice> {
                                                           }
                                                         });
                                                       }
+                                                    },
+                                                  ),
+                                                ),
+                                                Container(
+                                                  height: 50.h,
+                                                  // color: altColumn1,
+                                                  width: 160.w,
+                                                  child: MyTextField(
+                                                    isEditing: true,
+                                                    textAlign: TextAlign.end,
+                                                    invoiceData: false,
+                                                    hintText: '',
+                                                    textEditingController:
+                                                        detailsTableControllers[
+                                                            index][1],
+                                                    border: false,
+                                                    onChanged: (p0) {
+                                                      int cost = 0;
+                                                      int qty = 1;
+                                                      if (p0.isEmpty) {
+                                                        cost = 1;
+                                                      } else {
+                                                        qty = int.tryParse(
+                                                                removeNonAlphanumeric(
+                                                                    detailsTableControllers[
+                                                                            index][1]
+                                                                        .text)) ??
+                                                            1 as int;
+                                                        cost = int.tryParse(
+                                                            removeNonAlphanumeric(
+                                                                detailsTableControllers[
+                                                                        index][2]
+                                                                    .text)) as int;
+                                                      }
+                                                      setState(() {
+                                                        detailsTableControllers[
+                                                                    index][2]
+                                                                .text =
+                                                            (qty * cost)
+                                                                .toString();
+                                                      });
+                                                      updateCalculations();
                                                     },
                                                   ),
                                                 ),
@@ -625,7 +656,7 @@ class _NewInvoiceState extends State<NewInvoice> {
                                             MainAxisAlignment.start,
                                         children: [
                                           //add new job button
-                                          GestureDetector(
+                                          InkWell(
                                             onTap: addNewJob,
                                             child: SizedBox(
                                               height: 50.h,
@@ -652,7 +683,7 @@ class _NewInvoiceState extends State<NewInvoice> {
                                           SizedBox(width: 20.w),
 
                                           //remove last job button
-                                          GestureDetector(
+                                          InkWell(
                                             onTap: () {
                                               removeLastJob();
                                               updateCalculations();
@@ -682,7 +713,7 @@ class _NewInvoiceState extends State<NewInvoice> {
                                           SizedBox(width: 20.w),
 
                                           //edit job button
-                                          GestureDetector(
+                                          InkWell(
                                             onTap: () {
                                               TextEditingController controller =
                                                   TextEditingController();
@@ -774,10 +805,11 @@ class _NewInvoiceState extends State<NewInvoice> {
                     ),
 
                     SizedBox(height: 30.h),
-                    //generate invoice button
+                    //generate clear print invoice button
                     Row(
                       children: [
-                        GestureDetector(
+                        //save to firebase
+                        MyButton(
                           onTap: () {
                             //put data to firebase
 
@@ -787,22 +819,22 @@ class _NewInvoiceState extends State<NewInvoice> {
                                 total,
                                 payable,
                                 balance,
-                                nameController.text.toLowerCase(),
-                                phoneController.text.toLowerCase(),
-                                vehicleController.text.toLowerCase(),
-                                makeController.text.toLowerCase(),
-                                modelController.text.toLowerCase(),
-                                kilometerController.text.toLowerCase(),
-                                invoice as int,
+                                nameController.text,
+                                phoneController.text,
+                                vehicleController.text,
+                                makeController.text,
+                                modelController.text,
+                                kilometerController.text,
+                                invoice as String,
                                 int.tryParse(discountController.text) ?? 0,
                                 int.tryParse(paidController.text) ?? 0,
                                 profit,
                               );
                               //
-                              Navigator.of(context).push(
+                              Navigator.of(context).pushReplacement(
                                 MaterialPageRoute(builder: (context) {
                                   return InvoicePage(
-                                    invoice: invoice!,
+                                    invoice: invoice as String,
                                   );
                                 }),
                               );
@@ -810,45 +842,45 @@ class _NewInvoiceState extends State<NewInvoice> {
                               print(e.toString());
                             }
                           },
-                          child: Container(
-                            height: 50.h,
-                            width: 150.w,
-                            decoration: BoxDecoration(
-                              color: primaryAccent,
-                              borderRadius: BorderRadius.circular(8.w),
-                            ),
-                            child: Center(
-                              child: AutoSizeText(
-                                "Save Invoice",
-                                style: TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  color: textColor,
-                                ),
-                              ),
-                            ),
-                          ),
+                          containerColor: primaryAccent,
+                          textColor: textColor,
+                          buttonText: "Save Invoice",
+                          border: false,
                         ),
                         SizedBox(width: 20.w),
 
                         //CLEAR ALL DATA
-                        GestureDetector(
+                        MyButton(
                           onTap: clearData,
-                          child: Container(
-                            height: 50.h,
-                            width: 150.w,
-                            decoration: BoxDecoration(
-                              color: Colors.redAccent,
-                              borderRadius: BorderRadius.circular(8.w),
-                            ),
-                            child: Center(
-                              child: AutoSizeText(
-                                "Reset Invoice",
-                                style: TextStyle(
-                                    color: textColor,
-                                    fontWeight: FontWeight.bold),
-                              ),
-                            ),
-                          ),
+                          containerColor: Colors.redAccent,
+                          textColor: textColor,
+                          buttonText: "Reset Invoice",
+                          border: false,
+                        ),
+
+                        SizedBox(width: 20.w),
+
+                        //PRINT ALL DATA
+                        MyButton(
+                          onTap: () {
+                            createPdf(
+                              nameController.text,
+                              phoneController.text,
+                              vehicleController.text,
+                              modelController.text,
+                              discountController.text,
+                              paidController.text,
+                              invoice.toString().padLeft(6, '0'),
+                              total.toString(),
+                              payable.toString(),
+                              balance.toString(),
+                              detailsTableControllers,
+                            );
+                          },
+                          containerColor: Colors.transparent,
+                          textColor: textColor,
+                          buttonText: "Print",
+                          border: true,
                         ),
                       ],
                     ),
