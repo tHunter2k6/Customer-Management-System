@@ -92,6 +92,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                           onChanged: (String? newValue) {
                                             setState(() {
                                               _selectedFilter = newValue;
+                                              if (_selectedFilter ==
+                                                  "client name") {
+                                                searchDocs.clear();
+                                              }
                                             });
                                           },
                                           items: <String>[
@@ -190,8 +194,10 @@ class _MyHomePageState extends State<MyHomePage> {
                                                       height: 60.h,
                                                       width: 500.w,
                                                       decoration: BoxDecoration(
-                                                          color:
-                                                              Colors.blueGrey,
+                                                          border: Border.all(
+                                                            color:
+                                                                secondaryTextColor,
+                                                          ),
                                                           borderRadius:
                                                               BorderRadius
                                                                   .circular(
@@ -219,7 +225,9 @@ class _MyHomePageState extends State<MyHomePage> {
                                                   horizontal: 190.0.w),
                                               child: Container(
                                                 decoration: BoxDecoration(
-                                                    color: Colors.blueGrey,
+                                                    border: Border.all(
+                                                      color: secondaryTextColor,
+                                                    ),
                                                     borderRadius:
                                                         BorderRadius.circular(
                                                             12.w)),

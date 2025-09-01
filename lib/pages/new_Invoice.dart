@@ -544,6 +544,21 @@ class _NewInvoiceState extends State<NewInvoice> {
                                                     onChanged: (p0) {
                                                       updateCalculations();
                                                     },
+                                                  ),
+                                                ),
+                                                Container(
+                                                  height: 50.h,
+                                                  // color: altColumn1,
+                                                  width: 160.w,
+                                                  child: MyTextField(
+                                                    isEditing: true,
+                                                    textAlign: TextAlign.end,
+                                                    invoiceData: false,
+                                                    hintText: '',
+                                                    textEditingController:
+                                                        detailsTableControllers[
+                                                            index][1],
+                                                    border: false,
                                                     onSubmitted: (p0) {
                                                       if (index ==
                                                           detailsTableControllers
@@ -562,21 +577,6 @@ class _NewInvoiceState extends State<NewInvoice> {
                                                         });
                                                       }
                                                     },
-                                                  ),
-                                                ),
-                                                Container(
-                                                  height: 50.h,
-                                                  // color: altColumn1,
-                                                  width: 160.w,
-                                                  child: MyTextField(
-                                                    isEditing: true,
-                                                    textAlign: TextAlign.end,
-                                                    invoiceData: false,
-                                                    hintText: '',
-                                                    textEditingController:
-                                                        detailsTableControllers[
-                                                            index][1],
-                                                    border: false,
                                                     onChanged: (p0) {
                                                       int cost = 0;
                                                       int qty = 1;
@@ -621,6 +621,25 @@ class _NewInvoiceState extends State<NewInvoice> {
                                                               detailsTableControllers[
                                                                   index][3],
                                                           border: false,
+                                                          onSubmitted: (p0) {
+                                                            if (index ==
+                                                                detailsTableControllers
+                                                                        .length -
+                                                                    1) {
+                                                              _newRowFocusNode =
+                                                                  FocusNode();
+                                                              addNewJob();
+                                                              Future.delayed(
+                                                                  Duration.zero,
+                                                                  () {
+                                                                if (_newRowFocusNode !=
+                                                                    null) {
+                                                                  _newRowFocusNode!
+                                                                      .requestFocus();
+                                                                }
+                                                              });
+                                                            }
+                                                          },
                                                           onChanged: (p0) {
                                                             updateCalculations();
                                                           },

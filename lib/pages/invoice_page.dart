@@ -178,6 +178,10 @@ class _InvoicePageState extends State<InvoicePage> {
     _loadData();
   }
 
+  final FocusScopeNode _localScopeNode = FocusScopeNode();
+  final FocusNode _focusNode = FocusNode();
+  FocusNode? _newRowFocusNode;
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -381,407 +385,473 @@ class _InvoicePageState extends State<InvoicePage> {
                 Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    RawKeyboardListener(
-                      focusNode: FocusNode(),
-                      onKey: (RawKeyEvent event) {
-                        if (event is RawKeyDownEvent &&
-                            event.logicalKey == LogicalKeyboardKey.enter) {
-                          addNewJob();
-                        }
-                      },
-                      child: Container(
-                        width: isEditing ? 1000.w : 850.w,
-                        decoration: BoxDecoration(
-                          color: containerColor,
-                          borderRadius: BorderRadius.circular(8.w),
-                        ),
-                        child: Padding(
-                          padding: EdgeInsets.all(8.0.w),
-                          child: Column(
-                            children: [
-                              //title row
-                              Row(
-                                mainAxisAlignment: MainAxisAlignment.start,
-                                children: [
-                                  Container(
-                                    height: 50.h,
-                                    width: 70.w,
-                                    child: AutoSizeText(
-                                      "S No.",
-                                      textAlign: TextAlign.center,
-                                      style: TextStyle(
-                                        fontSize: 22.sp,
+                    FocusScope(
+                      node: _localScopeNode,
+                      child: RawKeyboardListener(
+                        focusNode: _focusNode,
+                        onKey: (RawKeyEvent event) {
+                          // if (event is RawKeyDownEvent &&
+                          //     event.logicalKey ==
+                          //         LogicalKeyboardKey.enter) {
+                          // _localScopeNode
+                          //     .nextFocus(); // Moves focus only within this scope
+                          // }
+                        },
+                        child: Container(
+                          width: isEditing ? 1000.w : 850.w,
+                          decoration: BoxDecoration(
+                            color: containerColor,
+                            borderRadius: BorderRadius.circular(8.w),
+                          ),
+                          child: Padding(
+                            padding: EdgeInsets.all(8.0.w),
+                            child: Column(
+                              children: [
+                                //title row
+                                Row(
+                                  mainAxisAlignment: MainAxisAlignment.start,
+                                  children: [
+                                    Container(
+                                      height: 50.h,
+                                      width: 70.w,
+                                      child: AutoSizeText(
+                                        "S No.",
+                                        textAlign: TextAlign.center,
+                                        style: TextStyle(
+                                          fontSize: 22.sp,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Container(
-                                    height: 50.h,
-                                    // color: altColumn2,
-                                    width: 400.w,
-                                    child: AutoSizeText(
-                                      "  Description",
-                                      textAlign: TextAlign.start,
-                                      style: TextStyle(
-                                        fontSize: 22.sp,
+                                    Container(
+                                      height: 50.h,
+                                      // color: altColumn2,
+                                      width: 400.w,
+                                      child: AutoSizeText(
+                                        "  Description",
+                                        textAlign: TextAlign.start,
+                                        style: TextStyle(
+                                          fontSize: 22.sp,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Container(
-                                    // color: altColumn2,
-                                    height: 50.h,
-                                    width: 142.w,
-                                    child: AutoSizeText(
-                                      "Cost",
-                                      textAlign: TextAlign.end,
-                                      style: TextStyle(
-                                        fontSize: 22.sp,
+                                    Container(
+                                      // color: altColumn2,
+                                      height: 50.h,
+                                      width: 142.w,
+                                      child: AutoSizeText(
+                                        "Cost",
+                                        textAlign: TextAlign.end,
+                                        style: TextStyle(
+                                          fontSize: 22.sp,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  Container(
-                                    height: 50.h,
-                                    // color: altColumn1,
-                                    width: 162.w,
-                                    child: AutoSizeText(
-                                      "Quantity",
-                                      textAlign: TextAlign.end,
-                                      style: TextStyle(
-                                        fontSize: 22.sp,
+                                    Container(
+                                      height: 50.h,
+                                      // color: altColumn1,
+                                      width: 162.w,
+                                      child: AutoSizeText(
+                                        "Quantity",
+                                        textAlign: TextAlign.end,
+                                        style: TextStyle(
+                                          fontSize: 22.sp,
+                                        ),
                                       ),
                                     ),
-                                  ),
-                                  isEditing
-                                      ? Container(
-                                          // color: altColumn2,
-                                          height: 50.h,
-                                          width: 170.w,
-                                          child: AutoSizeText(
-                                            "Purchase",
-                                            textAlign: TextAlign.end,
-                                            style: TextStyle(
-                                              fontSize: 22.sp,
-                                            ),
-                                          ),
-                                        )
-                                      : Center(),
-                                ],
-                              ),
-                              //details row ykwim
-                              StreamBuilder<List<List<TextEditingController>>>(
-                                stream: _controller.stream,
-                                initialData: detailsTableControllers,
-                                builder: (context, snapshot) {
-                                  controllers = snapshot.data ?? [];
-                                  return ListView.builder(
-                                    shrinkWrap: true,
-                                    itemCount: detailsTableControllers.length,
-                                    itemBuilder: (context, index) {
-                                      return detailsTableControllers.isEmpty
-                                          ? Center(
-                                              child: SizedBox(
-                                                width: 100.sp,
-                                                child:
-                                                    AutoSizeText("Loading..."),
+                                    isEditing
+                                        ? Container(
+                                            // color: altColumn2,
+                                            height: 50.h,
+                                            width: 170.w,
+                                            child: AutoSizeText(
+                                              "Purchase",
+                                              textAlign: TextAlign.end,
+                                              style: TextStyle(
+                                                fontSize: 22.sp,
                                               ),
-                                            )
-                                          : Column(
-                                              children: [
-                                                Row(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.start,
-                                                  children: [
-                                                    SizedBox(
-                                                      width: 70.w,
-                                                      height: 50.h,
-                                                      child: AutoSizeText(
-                                                        textAlign:
-                                                            TextAlign.center,
-                                                        "${index + 1}",
-                                                        style: TextStyle(
-                                                          fontSize: 22.sp,
+                                            ),
+                                          )
+                                        : Center(),
+                                  ],
+                                ),
+                                //details row ykwim
+                                StreamBuilder<
+                                    List<List<TextEditingController>>>(
+                                  stream: _controller.stream,
+                                  initialData: detailsTableControllers,
+                                  builder: (context, snapshot) {
+                                    controllers = snapshot.data ?? [];
+                                    return ListView.builder(
+                                      shrinkWrap: true,
+                                      itemCount: detailsTableControllers.length,
+                                      itemBuilder: (context, index) {
+                                        return detailsTableControllers.isEmpty
+                                            ? Center(
+                                                child: SizedBox(
+                                                  width: 100.sp,
+                                                  child: AutoSizeText(
+                                                      "Loading..."),
+                                                ),
+                                              )
+                                            : Column(
+                                                children: [
+                                                  Row(
+                                                    mainAxisAlignment:
+                                                        MainAxisAlignment.start,
+                                                    children: [
+                                                      SizedBox(
+                                                        width: 70.w,
+                                                        height: 50.h,
+                                                        child: AutoSizeText(
+                                                          textAlign:
+                                                              TextAlign.center,
+                                                          "${index + 1}",
+                                                          style: TextStyle(
+                                                            fontSize: 22.sp,
+                                                          ),
                                                         ),
                                                       ),
-                                                    ),
-                                                    Container(
-                                                      height: 50.h,
-                                                      // color: altColumn2,
-                                                      width: 400.w,
-                                                      child: MyTextField(
-                                                        textAlign:
-                                                            TextAlign.start,
-                                                        isEditing: isEditing,
-                                                        invoiceData: false,
-                                                        hintText: '',
-                                                        textEditingController:
-                                                            detailsTableControllers[
-                                                                index][0],
-                                                        border: false,
+                                                      Container(
+                                                        height: 50.h,
+                                                        // color: altColumn2,
+                                                        width: 400.w,
+                                                        child: MyTextField(
+                                                          textAlign:
+                                                              TextAlign.start,
+                                                          isEditing: isEditing,
+                                                          invoiceData: false,
+                                                          hintText: '',
+                                                          textEditingController:
+                                                              detailsTableControllers[
+                                                                  index][0],
+                                                          border: false,
+                                                          focusNode: index ==
+                                                                  detailsTableControllers
+                                                                          .length -
+                                                                      1
+                                                              ? _newRowFocusNode
+                                                              : null,
+                                                        ),
                                                       ),
-                                                    ),
-                                                    Container(
-                                                      // color: altColumn2,
-                                                      width: 160.w,
-                                                      height: 50.h,
-                                                      child: MyTextField(
-                                                        isEditing: isEditing,
-                                                        textAlign:
-                                                            TextAlign.end,
-                                                        invoiceData: false,
-                                                        hintText: '',
-                                                        textEditingController:
-                                                            detailsTableControllers[
-                                                                index][2],
-                                                        border: false,
-                                                        onChanged: (p0) {
-                                                          updateCalculations();
-                                                        },
-                                                      ),
-                                                    ),
-                                                    Container(
-                                                      height: 50.h,
-                                                      // color: altColumn1,
-                                                      width: 160.w,
-                                                      child: MyTextField(
-                                                        isEditing: isEditing,
-                                                        textAlign:
-                                                            TextAlign.end,
-                                                        invoiceData: false,
-                                                        hintText: '',
-                                                        textEditingController:
-                                                            detailsTableControllers[
-                                                                index][1],
-                                                        border: false,
-                                                        onChanged: (p0) {
-                                                          int cost = 0;
-                                                          int qty = 1;
-                                                          if (p0.isEmpty) {
-                                                            cost = 1;
-                                                          } else {
-                                                            qty = int.tryParse(removeNonAlphanumeric(
-                                                                    detailsTableControllers[
-                                                                            index][1]
-                                                                        .text)) ??
-                                                                1 as int;
-                                                            cost = int.tryParse(
-                                                                removeNonAlphanumeric(
-                                                                    detailsTableControllers[
-                                                                            index][2]
-                                                                        .text)) as int;
-                                                          }
-                                                          setState(() {
-                                                            detailsTableControllers[
-                                                                    index][2]
-                                                                .text = (qty *
-                                                                    cost)
-                                                                .toString();
-                                                          });
-                                                          updateCalculations();
-                                                        },
-                                                      ),
-                                                    ),
-                                                    isEditing
-                                                        ? Container(
-                                                            // color: altColumn2,
-                                                            width: 170.w,
-                                                            height: 50.h,
-                                                            child: MyTextField(
-                                                              isEditing:
-                                                                  isEditing,
-                                                              textAlign:
-                                                                  TextAlign.end,
-                                                              invoiceData:
-                                                                  false,
-                                                              hintText: '',
-                                                              textEditingController:
-                                                                  detailsTableControllers[
-                                                                      index][3],
-                                                              border: false,
-                                                              onChanged: (p0) {
-                                                                updateCalculations();
-                                                              },
-                                                            ),
-                                                          )
-                                                        : Center(),
-                                                  ],
-                                                ),
-                                                Divider(
-                                                  color: secondaryTextColor,
-                                                  thickness: 0.1,
-                                                )
-                                              ],
-                                            );
-                                    },
-                                  );
-                                },
-                              ),
-                              // add remove buttons
-                              Column(
-                                children: [
-                                  Padding(
-                                    padding:
-                                        EdgeInsets.symmetric(horizontal: 20.w),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.start,
-                                          children: [
-                                            //add new job button
-                                            InkWell(
-                                              onTap:
-                                                  isEditing ? addNewJob : () {},
-                                              child: SizedBox(
-                                                height: 50.h,
-                                                width: 150.w,
-                                                child: Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.add_circle,
-                                                      color: secondaryTextColor,
-                                                    ),
-                                                    SizedBox(width: 10.w),
-                                                    AutoSizeText(
-                                                      "Add Item",
-                                                      style: TextStyle(
-                                                          color:
-                                                              secondaryTextColor,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(width: 20.w),
-
-                                            //remove last job button
-                                            InkWell(
-                                              onTap: isEditing
-                                                  ? () {
-                                                      removeLastJob();
-                                                      updateCalculations();
-                                                    }
-                                                  : () {},
-                                              child: SizedBox(
-                                                height: 50.h,
-                                                width: 150.w,
-                                                child: Row(
-                                                  children: [
-                                                    Icon(
-                                                      Icons.remove_circle,
-                                                      color: secondaryTextColor,
-                                                    ),
-                                                    SizedBox(width: 10.w),
-                                                    AutoSizeText(
-                                                      "Remove Item",
-                                                      style: TextStyle(
-                                                          color:
-                                                              secondaryTextColor,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                  ],
-                                                ),
-                                              ),
-                                            ),
-                                            SizedBox(width: 20.w),
-
-                                            //edit job button
-                                            InkWell(
-                                              onTap: () {
-                                                TextEditingController
-                                                    controller =
-                                                    TextEditingController();
-                                                isEditing == false
-                                                    ? {
-                                                        showDialog(
-                                                          barrierDismissible:
-                                                              true,
-                                                          context: context,
-                                                          builder: (BuildContext
-                                                              context) {
-                                                            return AlertDialog(
-                                                              title: Container(
-                                                                height: 50.h,
-                                                                width: 200.w,
-                                                                child: AutoSizeText(
-                                                                    "Enter Password"),
-                                                              ),
-                                                              content:
-                                                                  TextField(
-                                                                controller:
-                                                                    controller,
-                                                                onSubmitted:
-                                                                    (value) {
-                                                                  if (controller
-                                                                          .text ==
-                                                                      '1234') {
-                                                                    setState(
-                                                                        () {
-                                                                      isEditing =
-                                                                          true;
-                                                                    });
-                                                                    Navigator.of(
-                                                                            context)
-                                                                        .pop();
-                                                                  } else {
-                                                                    Navigator.of(
-                                                                            context)
-                                                                        .pop();
-                                                                  }
-                                                                },
-                                                              ),
-                                                            );
+                                                      Container(
+                                                        // color: altColumn2,
+                                                        width: 160.w,
+                                                        height: 50.h,
+                                                        child: MyTextField(
+                                                          isEditing: isEditing,
+                                                          textAlign:
+                                                              TextAlign.end,
+                                                          invoiceData: false,
+                                                          hintText: '',
+                                                          textEditingController:
+                                                              detailsTableControllers[
+                                                                  index][2],
+                                                          border: false,
+                                                          onChanged: (p0) {
+                                                            updateCalculations();
                                                           },
                                                         ),
-                                                      }
-                                                    : setState(() {
-                                                        isEditing = false;
-                                                      });
-                                              },
-                                              child: SizedBox(
-                                                height: 50.h,
-                                                width: 150.w,
-                                                child: Row(
-                                                  children: [
-                                                    Icon(
+                                                      ),
+                                                      Container(
+                                                        height: 50.h,
+                                                        // color: altColumn1,
+                                                        width: 160.w,
+                                                        child: MyTextField(
+                                                          isEditing: isEditing,
+                                                          textAlign:
+                                                              TextAlign.end,
+                                                          invoiceData: false,
+                                                          hintText: '',
+                                                          textEditingController:
+                                                              detailsTableControllers[
+                                                                  index][1],
+                                                          border: false,
+                                                          onSubmitted: (p0) {
+                                                            if (index ==
+                                                                detailsTableControllers
+                                                                        .length -
+                                                                    1) {
+                                                              _newRowFocusNode =
+                                                                  FocusNode();
+                                                              addNewJob();
+                                                              Future.delayed(
+                                                                  Duration.zero,
+                                                                  () {
+                                                                if (_newRowFocusNode !=
+                                                                    null) {
+                                                                  _newRowFocusNode!
+                                                                      .requestFocus();
+                                                                }
+                                                              });
+                                                            }
+                                                          },
+                                                          onChanged: (p0) {
+                                                            int cost = 0;
+                                                            int qty = 1;
+                                                            if (p0.isEmpty) {
+                                                              cost = 1;
+                                                            } else {
+                                                              qty = int.tryParse(removeNonAlphanumeric(
+                                                                      detailsTableControllers[index]
+                                                                              [
+                                                                              1]
+                                                                          .text)) ??
+                                                                  1 as int;
+                                                              cost = int.tryParse(
+                                                                  removeNonAlphanumeric(
+                                                                      detailsTableControllers[index]
+                                                                              [
+                                                                              2]
+                                                                          .text)) as int;
+                                                            }
+                                                            setState(() {
+                                                              detailsTableControllers[
+                                                                      index][2]
+                                                                  .text = (qty *
+                                                                      cost)
+                                                                  .toString();
+                                                            });
+                                                            updateCalculations();
+                                                          },
+                                                        ),
+                                                      ),
                                                       isEditing
-                                                          ? Icons.done
-                                                          : Icons.edit,
-                                                      color: secondaryTextColor,
-                                                    ),
-                                                    SizedBox(width: 10.w),
-                                                    AutoSizeText(
-                                                      isEditing
-                                                          ? "Done"
-                                                          : "Edit",
-                                                      style: TextStyle(
-                                                          color:
-                                                              secondaryTextColor,
-                                                          fontWeight:
-                                                              FontWeight.bold),
-                                                    ),
-                                                  ],
+                                                          ? Container(
+                                                              // color: altColumn2,
+                                                              width: 170.w,
+                                                              height: 50.h,
+                                                              child:
+                                                                  MyTextField(
+                                                                isEditing:
+                                                                    isEditing,
+                                                                textAlign:
+                                                                    TextAlign
+                                                                        .end,
+                                                                invoiceData:
+                                                                    false,
+                                                                hintText: '',
+                                                                textEditingController:
+                                                                    detailsTableControllers[
+                                                                        index][3],
+                                                                border: false,
+                                                                onSubmitted:
+                                                                    (p0) {
+                                                                  if (index ==
+                                                                      detailsTableControllers
+                                                                              .length -
+                                                                          1) {
+                                                                    _newRowFocusNode =
+                                                                        FocusNode();
+                                                                    addNewJob();
+                                                                    Future.delayed(
+                                                                        Duration
+                                                                            .zero,
+                                                                        () {
+                                                                      if (_newRowFocusNode !=
+                                                                          null) {
+                                                                        _newRowFocusNode!
+                                                                            .requestFocus();
+                                                                      }
+                                                                    });
+                                                                  }
+                                                                },
+                                                                onChanged:
+                                                                    (p0) {
+                                                                  updateCalculations();
+                                                                },
+                                                              ),
+                                                            )
+                                                          : Center(),
+                                                    ],
+                                                  ),
+                                                  Divider(
+                                                    color: secondaryTextColor,
+                                                    thickness: 0.1,
+                                                  )
+                                                ],
+                                              );
+                                      },
+                                    );
+                                  },
+                                ),
+                                // add remove buttons
+                                Column(
+                                  children: [
+                                    Padding(
+                                      padding: EdgeInsets.symmetric(
+                                          horizontal: 20.w),
+                                      child: Row(
+                                        mainAxisAlignment:
+                                            MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.start,
+                                            children: [
+                                              //add new job button
+                                              InkWell(
+                                                onTap: isEditing
+                                                    ? addNewJob
+                                                    : () {},
+                                                child: SizedBox(
+                                                  height: 50.h,
+                                                  width: 150.w,
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.add_circle,
+                                                        color:
+                                                            secondaryTextColor,
+                                                      ),
+                                                      SizedBox(width: 10.w),
+                                                      AutoSizeText(
+                                                        "Add Item",
+                                                        style: TextStyle(
+                                                            color:
+                                                                secondaryTextColor,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                    ],
+                                                  ),
                                                 ),
                                               ),
-                                            ),
-                                          ],
-                                        ),
-                                        isEditing
-                                            ? AutoSizeText(
-                                                "Gross Profit: Rs $profit",
-                                                style:
-                                                    TextStyle(fontSize: 22.sp),
-                                              )
-                                            : Center(),
-                                      ],
+                                              SizedBox(width: 20.w),
+
+                                              //remove last job button
+                                              InkWell(
+                                                onTap: isEditing
+                                                    ? () {
+                                                        removeLastJob();
+                                                        updateCalculations();
+                                                      }
+                                                    : () {},
+                                                child: SizedBox(
+                                                  height: 50.h,
+                                                  width: 150.w,
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(
+                                                        Icons.remove_circle,
+                                                        color:
+                                                            secondaryTextColor,
+                                                      ),
+                                                      SizedBox(width: 10.w),
+                                                      AutoSizeText(
+                                                        "Remove Item",
+                                                        style: TextStyle(
+                                                            color:
+                                                                secondaryTextColor,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                              SizedBox(width: 20.w),
+
+                                              //edit job button
+                                              InkWell(
+                                                onTap: () {
+                                                  TextEditingController
+                                                      controller =
+                                                      TextEditingController();
+                                                  isEditing == false
+                                                      ? {
+                                                          showDialog(
+                                                            barrierDismissible:
+                                                                true,
+                                                            context: context,
+                                                            builder:
+                                                                (BuildContext
+                                                                    context) {
+                                                              return AlertDialog(
+                                                                title:
+                                                                    Container(
+                                                                  height: 50.h,
+                                                                  width: 200.w,
+                                                                  child: AutoSizeText(
+                                                                      "Enter Password"),
+                                                                ),
+                                                                content:
+                                                                    TextField(
+                                                                  controller:
+                                                                      controller,
+                                                                  onSubmitted:
+                                                                      (value) {
+                                                                    if (controller
+                                                                            .text ==
+                                                                        '1234') {
+                                                                      setState(
+                                                                          () {
+                                                                        isEditing =
+                                                                            true;
+                                                                      });
+                                                                      Navigator.of(
+                                                                              context)
+                                                                          .pop();
+                                                                    } else {
+                                                                      Navigator.of(
+                                                                              context)
+                                                                          .pop();
+                                                                    }
+                                                                  },
+                                                                ),
+                                                              );
+                                                            },
+                                                          ),
+                                                        }
+                                                      : setState(() {
+                                                          isEditing = false;
+                                                        });
+                                                },
+                                                child: SizedBox(
+                                                  height: 50.h,
+                                                  width: 150.w,
+                                                  child: Row(
+                                                    children: [
+                                                      Icon(
+                                                        isEditing
+                                                            ? Icons.done
+                                                            : Icons.edit,
+                                                        color:
+                                                            secondaryTextColor,
+                                                      ),
+                                                      SizedBox(width: 10.w),
+                                                      AutoSizeText(
+                                                        isEditing
+                                                            ? "Done"
+                                                            : "Edit",
+                                                        style: TextStyle(
+                                                            color:
+                                                                secondaryTextColor,
+                                                            fontWeight:
+                                                                FontWeight
+                                                                    .bold),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                              ),
+                                            ],
+                                          ),
+                                          isEditing
+                                              ? AutoSizeText(
+                                                  "Gross Profit: Rs $profit",
+                                                  style: TextStyle(
+                                                      fontSize: 22.sp),
+                                                )
+                                              : Center(),
+                                        ],
+                                      ),
                                     ),
-                                  ),
-                                ],
-                              ),
-                            ],
+                                  ],
+                                ),
+                              ],
+                            ),
                           ),
                         ),
                       ),

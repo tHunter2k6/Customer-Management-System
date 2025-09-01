@@ -48,6 +48,7 @@ void createPdf(
             ),
             pw.SizedBox(height: 12),
             pw.Text('Invoice #: $invoice'),
+            pw.Text('Date: ${DateFormat('dd/MM/yy').format(DateTime.now())}'),
             pw.SizedBox(height: 4),
             pw.Text('Name: $name'),
             pw.Text('Phone: $phone'),
