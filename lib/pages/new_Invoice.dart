@@ -201,7 +201,7 @@ class _NewInvoiceState extends State<NewInvoice> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   AutoSizeText(
-                    "LR Autos ",
+                    "LR AUTOS ",
                     style: TextStyle(
                       color: textColor,
                       fontSize: 50.sp,
@@ -243,7 +243,7 @@ class _NewInvoiceState extends State<NewInvoice> {
                           width: 1000.w,
                           child: MyTextField(
                             isEditing: true,
-                            hintText: 'Enter Name',
+                            hintText: 'Customer Name',
                             invoiceData: false,
                             textEditingController: nameController,
                             border: false,
@@ -432,7 +432,7 @@ class _NewInvoiceState extends State<NewInvoice> {
                                   height: 50.h,
                                   width: 142.w,
                                   child: AutoSizeText(
-                                    "Cost",
+                                    "Price",
                                     textAlign: TextAlign.end,
                                     style: TextStyle(
                                       fontSize: 22.sp,

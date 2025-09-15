@@ -199,7 +199,7 @@ class _InvoicePageState extends State<InvoicePage> {
                 mainAxisAlignment: MainAxisAlignment.spaceBetween,
                 children: [
                   AutoSizeText(
-                    "LR Autos ",
+                    "LR AUTOS ",
                     style: TextStyle(
                       color: textColor,
                       fontSize: 50.sp,
@@ -439,7 +439,7 @@ class _InvoicePageState extends State<InvoicePage> {
                                       height: 50.h,
                                       width: 142.w,
                                       child: AutoSizeText(
-                                        "Cost",
+                                        "Price",
                                         textAlign: TextAlign.end,
                                         style: TextStyle(
                                           fontSize: 22.sp,

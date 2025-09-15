@@ -43,7 +43,7 @@ class _MyHomePageState extends State<MyHomePage> {
             child: Container(
               width: MediaQuery.of(context).size.width * 0.75,
               decoration: BoxDecoration(
-                color: const Color.fromARGB(255, 49, 49, 49),
+                // color: const Color.fromARGB(255, 49, 49, 49),
                 borderRadius: BorderRadius.circular(12.w),
               ),
               child: Padding(
@@ -52,7 +52,7 @@ class _MyHomePageState extends State<MyHomePage> {
                   children: [
                     Center(
                       child: AutoSizeText(
-                        "LR Autos",
+                        "LR AUTOS",
                         style: TextStyle(
                           color: textColor,
                           fontSize: 80.sp,
